@@ -1,5 +1,6 @@
-const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
+// Tailwind v4-hez, ESM környezetben ("type": "module")
+import tailwindcss from "@tailwindcss/postcss";
 
-export default config;
+export default {
+  plugins: [tailwindcss],
+};
