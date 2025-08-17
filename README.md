@@ -44,3 +44,8 @@ npm dev  # http://localhost:3000
 npm build
 npm start
 ```
+
+Képek:
+![RSS aggregator – főoldal](https://github.com/n0rvyll/rss-aggregator/blob/main/readme/01.jpeg)
+![Hír forrása választás](https://github.com/n0rvyll/rss-aggregator/blob/main/readme/02.jpeg)
+![Beállítások panel](hhttps://github.com/n0rvyll/rss-aggregator/blob/main/readme/03.jpeg)
