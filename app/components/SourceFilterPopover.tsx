@@ -29,9 +29,9 @@ export default function SourceFilterPopover({
         if (!alive) return;
         setSources(Array.isArray(data?.sources) ? data.sources : []);
         setError(null);
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (!alive) return;
-        setError(e?.message || "Hálózati hiba");
+        setError((e instanceof Error ? e.message : String(e)) || "Hálózati hiba");
       } finally {
         if (alive) setLoading(false);
       }
@@ -67,7 +67,7 @@ export default function SourceFilterPopover({
         return next;
       }
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       // ha végül minden benne van → vissza null (tisztább URL)
       if (next.size === sources.length) return null;
       return next;

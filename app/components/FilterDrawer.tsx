@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
 import SourceFilter from "./SourceFilter";
-import SearchBar from "./SearchBar";
-
 export default function FilterDrawer({
   open,
   onClose,

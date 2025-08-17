@@ -48,7 +48,7 @@ export function toHangCanonicalImage(u?: string): string | undefined {
  */
 export function hangCandidatesFromUrl(u?: string): string[] {
   if (!u) return [];
-  let out: string[] = [];
+  const out: string[] = [];
 
   try {
     const url = new URL(u);

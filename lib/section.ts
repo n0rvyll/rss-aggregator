@@ -41,6 +41,7 @@ export function sectionFromUrl(u?: string): string | undefined {
 }
 
 /** RSS item -> rovat: categories / category / dc:subject / tags -> URL fallback */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normalizeSection(item: any, link?: string): string | undefined {
   const raw =
     (Array.isArray(item.categories) && item.categories[0]) ||

@@ -1,4 +1,5 @@
 // lib/extractImage.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function extractImageFromItem(
   item: any,
   link?: string

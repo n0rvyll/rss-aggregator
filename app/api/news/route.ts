@@ -8,10 +8,10 @@ import { fetchOgImage } from "@/lib/fetchOgImage";
 import { dedupeArticles } from "@/lib/dedupe";
 import { isGuardianLink } from "@/lib/guardian";
 import { isHangLink } from "@/lib/hang";
-import { normalizeSection } from "@/lib/section";
 
 export const runtime = "nodejs";
 export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 const PER_SOURCE_LIMIT = 25;
 const MAX_TOTAL = 250;
@@ -91,27 +91,53 @@ async function fetchSourceWithStats(
 ): Promise<{ items: Article[]; stat: SourceStat }> {
   try {
     const feed = await fetchAndParse(url, signal);
-    const itemsRaw = (feed?.items || []) as any[];
+    const itemsRaw = (feed?.items || []) as unknown[];
 
     const items = itemsRaw
       .map((item, i) => {
-        const link = item.link || "";
-        const publishedAt =
-          item.isoDate || item.pubDate || item["dc:date"] || undefined;
+        // unknown -> biztonságos szűkítés
+        const r = item as Record<string, unknown>;
+
+        const link = typeof r.link === "string" ? r.link : "";
+
+        const dc = r["dc:date"];
+        const publishedRaw =
+          typeof r.isoDate === "string"
+            ? r.isoDate
+            : typeof r.pubDate === "string"
+            ? r.pubDate
+            : typeof dc === "string"
+            ? dc
+            : undefined;
+
+        const publishedAt = publishedRaw
+          ? new Date(publishedRaw).toISOString()
+          : undefined;
+
+        const title = typeof r.title === "string" ? r.title : "(cím nélkül)";
+
+        const description =
+          typeof r.contentSnippet === "string"
+            ? r.contentSnippet
+            : typeof r.summary === "string"
+            ? r.summary
+            : typeof r.description === "string"
+            ? (r.description as string)
+            : undefined;
+
+        // extractImageFromItem paramétere 'any', de NEM kell castolni – az 'unknown' átmegy
         const imageUrl = extractImageFromItem(item, link);
-        const description: string | undefined =
-          item.contentSnippet || item.summary || undefined;
-        const section = normalizeSection(item, link);
+
+        // Ha később kell rovat, itt ki tudod szedni – most kommentben hagyjuk, hogy ne legyen unused:
+        // const section = normalizeSection(item, link);
 
         const art: Article = {
           id: `${sourceId}-${i}-${link}`,
-          title: item.title || "(cím nélkül)",
+          title,
           link,
           sourceId,
           sourceName,
-          publishedAt: publishedAt
-            ? new Date(publishedAt).toISOString()
-            : undefined,
+          publishedAt,
           imageUrl,
           description,
         };
@@ -134,7 +160,7 @@ async function fetchSourceWithStats(
         items: items.length,
       },
     };
-  } catch (e: any) {
+  } catch (e: unknown) {
     return {
       items: [],
       stat: {
@@ -143,7 +169,7 @@ async function fetchSourceWithStats(
         url,
         ok: false,
         items: 0,
-        error: String(e?.message || e),
+        error: String((e instanceof Error ? e.message : String(e)) || e),
       },
     };
   }

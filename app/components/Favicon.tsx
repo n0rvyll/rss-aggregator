@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import Image from "next/image";
 
 /** Biztonságos origin kinyerés. Csak http/https és teljes URL esetén tér vissza. */
 function safeOrigin(u?: string | null): string | null {
@@ -53,8 +54,8 @@ export default function Favicon({
   const src = `${origin}/favicon.ico`;
 
   return (
-    // sima <img> – nincs next/image domain-whitelist mizéria
-    <img
+    // sima <Image unoptimized> – nincs next/image domain-whitelist mizéria
+    <Image unoptimized
       src={src}
       width={size}
       height={size}

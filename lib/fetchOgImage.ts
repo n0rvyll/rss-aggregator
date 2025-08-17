@@ -5,7 +5,7 @@ import { isHangLink, toHangCanonicalImage } from "@/lib/hang";
 function normFromPage(articleUrl: string, u?: string) {
   try {
     if (!u) return undefined;
-    if (/^data:|^blob:/.test(u)) return undefined;
+    if (/^data:|^blob:/i.test(u)) return undefined;
     const abs = new URL(u, articleUrl).toString();
     // domain-specifikus normalizálás
     return toHangCanonicalImage(toGuardianCdn(abs));
@@ -78,7 +78,8 @@ export async function fetchOgImage(
     for (const m of ldBlocks) {
       try {
         const json = JSON.parse(m[1].trim());
-        const pick = (val: any): string | undefined => {
+
+        const pick = (val: unknown): string | undefined => {
           if (!val) return undefined;
           if (typeof val === "string") return normFromPage(articleUrl, val);
           if (Array.isArray(val)) {
@@ -88,20 +89,53 @@ export async function fetchOgImage(
             }
             return undefined;
           }
-          if (typeof val === "object") {
-            return normFromPage(
-              articleUrl,
-              val.url || val.contentUrl || val["@id"] || val.src || val.image
-            );
+          if (val && typeof val === "object") {
+            const o = val as Record<string, unknown>;
+            // gyakori kulcsok: url, contentUrl, @id, src, image, image.url stb.
+            const directCandidate =
+              (o.url as unknown) ??
+              (o.contentUrl as unknown) ??
+              (o["@id"] as unknown) ??
+              (o.src as unknown) ??
+              (o.image as unknown);
+
+            // object.image lehet maga object is -> próbáljuk rekurzívan
+            if (typeof directCandidate === "string") {
+              return normFromPage(articleUrl, directCandidate);
+            }
+            if (directCandidate && typeof directCandidate === "object") {
+              const nested = pick(directCandidate);
+              if (nested) return nested;
+            }
+
+            // gyakran "image" lehet tömb vagy beágyazott struktúra
+            const imageField = o["image"];
+            if (Array.isArray(imageField)) {
+              for (const iv of imageField) {
+                const r2 = pick(iv);
+                if (r2) return r2;
+              }
+            }
+
+            // egyéb ismert mezők: thumbnailUrl
+            const thumb = o["thumbnailUrl"];
+            if (typeof thumb === "string") {
+              return normFromPage(articleUrl, thumb);
+            }
+
+            return undefined;
           }
           return undefined;
         };
-        const candidate = pick(json.image) || pick(json.primaryImageOfPage);
-        if (candidate && !/\.svg($|\?)/i.test(candidate)) return candidate;
-      } catch {}
+
+        const fromJson = pick(json);
+        if (fromJson) return fromJson;
+      } catch {
+        // hibás JSON-LD blokk – lépjünk tovább
+      }
     }
 
-    // 3) Fallback: első <img> (srcset → nagyobb)
+    // 3) Fallback: első <img> (srcset → a legnagyobb szélességű)
     const set = html.match(
       /<img[^>]+(?:srcset|data-srcset)\s*=\s*"([^"]+)"/i
     )?.[1];
