@@ -550,7 +550,7 @@ export default function HomeClient() {
     } catch {}
   }, [theme]);
 
-  // follow system in "system" mode
+  // follow system in "system" mode (modern + legacy Safari támogatás)
   useEffect(() => {
     if (theme !== "system") return;
 
