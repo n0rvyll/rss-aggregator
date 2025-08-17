@@ -66,12 +66,11 @@ export default function FilterDrawer({
           </button>
         </div>
         <div className="p-4 space-y-4">
-  <SourceFilter />
-  <p className="text-xs text-neutral-500">
-    Tipp: az URL megjegyzi a szűrőket.
-  </p>
-</div>
-
+          <SourceFilter />
+          <p className="text-xs text-neutral-500">
+            Tipp: az URL megjegyzi a szűrőket.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -114,7 +114,6 @@ async function fetchSourceWithStats(
             : undefined,
           imageUrl,
           description,
-          section,
         };
         return art;
       })

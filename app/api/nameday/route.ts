@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const revalidate = 60 * 60 * 6; // 6 óra
+export const revalidate = 21600;
 
 // Egyszerű HU névnap-térkép. Töltsd fel később teljes készlettel.
 // Kulcs: "M-D" (vezető nullák NINCSENEK). Érték: név(ek) vesszővel.

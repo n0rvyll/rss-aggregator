@@ -32,8 +32,15 @@ export default function Favicon({
     const letter = (alt?.trim()?.[0] || "•").toUpperCase();
     return (
       <span
-        className={["inline-flex items-center justify-center rounded-sm bg-neutral-200 text-neutral-600", className].join(" ")}
-        style={{ width: size, height: size, fontSize: Math.max(10, Math.floor(size * 0.7)) }}
+        className={[
+          "inline-flex items-center justify-center rounded-sm bg-neutral-200 text-neutral-600",
+          className,
+        ].join(" ")}
+        style={{
+          width: size,
+          height: size,
+          fontSize: Math.max(10, Math.floor(size * 0.7)),
+        }}
         aria-hidden
         title={alt}
       >
